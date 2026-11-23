@@ -434,8 +434,17 @@ export interface YearComparisonData {
   artistMatrix: Array<{
     name: string;
     totalPlays: number;
+    allTimePlays: number;
     byYear: Record<number, number>;
   }>;
+  allTime: {
+    totalPlays: number;
+    totalMinutes: number;
+    totalHours: number;
+    yearCount: number;
+    avgPlaysPerYear: number;
+    avgHoursPerYear: number;
+  };
 }
 
 const SHORT_MONTHS = [
@@ -452,6 +461,7 @@ export function computeYearlyComparison(
   const summaries: Record<number, AnalyticsSummary> = {};
   const monthBuckets: Array<Record<string, string | number>> = SHORT_MONTHS.map((m) => ({
     month: m,
+    allAvg: 0,
   }));
 
   const eventsByYear = new Map<number, PlayEvent[]>();
@@ -462,18 +472,39 @@ export function computeYearlyComparison(
     }
   }
 
+  // Track all-time stats across ALL years in events
+  const allYearsSet = new Set<number>();
+  const allTimeMonthTotals = Array(12).fill(0);
+  const allTimeArtistCounts = new Map<string, number>();
+  let allTimePlays = 0;
+  let allTimeSec = 0;
+
   for (const ev of events) {
     const d = new Date(ev.playedAt);
     if (Number.isNaN(d.getTime())) continue;
     const y = d.getFullYear();
+    const mIdx = d.getMonth();
+    const dur = ev.durationSec || 210;
+    const val = metric === 'plays' ? 1 : dur / 60;
+
+    allYearsSet.add(y);
+    allTimePlays += 1;
+    allTimeSec += dur;
+    allTimeMonthTotals[mIdx] += val;
+    const aName = ev.artist || 'Unknown Artist';
+    allTimeArtistCounts.set(aName, (allTimeArtistCounts.get(aName) ?? 0) + 1);
+
     const list = eventsByYear.get(y);
     if (!list) continue;
     list.push(ev);
-    const mIdx = d.getMonth();
-    const val = metric === 'plays' ? 1 : (ev.durationSec || 210) / 60;
     monthBuckets[mIdx][String(y)] = Number(
       ((monthBuckets[mIdx][String(y)] as number) + val).toFixed(1)
     );
+  }
+
+  const allYearCount = Math.max(1, allYearsSet.size);
+  for (let m = 0; m < 12; m++) {
+    monthBuckets[m].allAvg = Number((allTimeMonthTotals[m] / allYearCount).toFixed(1));
   }
 
   const artistTotals = new Map<string, { total: number; byYear: Record<number, number> }>();
@@ -500,14 +531,26 @@ export function computeYearlyComparison(
     .map(([name, data]) => ({
       name,
       totalPlays: data.total,
+      allTimePlays: allTimeArtistCounts.get(name) ?? data.total,
       byYear: data.byYear,
     }));
+
+  const allTimeMinutes = Math.round(allTimeSec / 60);
+  const allTimeHours = Number((allTimeSec / 3600).toFixed(1));
 
   return {
     years: sortedYears,
     summaries,
     monthlyOverlay: monthBuckets,
     artistMatrix,
+    allTime: {
+      totalPlays: allTimePlays,
+      totalMinutes: allTimeMinutes,
+      totalHours: allTimeHours,
+      yearCount: allYearCount,
+      avgPlaysPerYear: Math.round(allTimePlays / allYearCount),
+      avgHoursPerYear: Number((allTimeHours / allYearCount).toFixed(1)),
+    },
   };
 }
 

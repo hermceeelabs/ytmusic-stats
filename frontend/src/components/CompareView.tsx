@@ -35,6 +35,7 @@ export const CompareView: React.FC<CompareViewProps> = ({
   const [metric, setMetric] = useState<'plays' | 'minutes'>('plays');
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
   const [pinned, setPinned] = useState<boolean>(true);
+  const [showAllAvg, setShowAllAvg] = useState<boolean>(true);
 
   useEffect(() => {
     setSelectedYears((prev) => {
@@ -155,6 +156,31 @@ export const CompareView: React.FC<CompareViewProps> = ({
         </div>
       </div>
 
+      {/* All-Years Benchmark Strip */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-800/80 bg-[#0d0d12] px-5 py-3 text-xs">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+          <span className="font-semibold text-zinc-200">
+            All Years ({comparison.allTime.yearCount} yrs):
+          </span>
+          <span className="text-zinc-400">
+            <strong className="text-white">{comparison.allTime.totalPlays.toLocaleString()}</strong> total plays
+          </span>
+          <span className="text-zinc-400">
+            <strong className="text-white">{comparison.allTime.totalHours.toLocaleString()} hrs</strong> ({comparison.allTime.totalMinutes.toLocaleString()} mins)
+          </span>
+        </div>
+        <div className="text-zinc-400">
+          Yearly Avg:{' '}
+          <strong className="text-zinc-200">
+            {comparison.allTime.avgPlaysPerYear.toLocaleString()} plays
+          </strong>{' '}
+          ·{' '}
+          <strong className="text-zinc-200">
+            {comparison.allTime.avgHoursPerYear.toLocaleString()} hrs/yr
+          </strong>
+        </div>
+      </div>
+
       {/* Side-by-Side Year Scorecards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {comparison.years.map((y, idx) => {
@@ -166,6 +192,20 @@ export const CompareView: React.FC<CompareViewProps> = ({
                   (((s.totalPlays - prevYear.totalPlays) / prevYear.totalPlays) * 100).toFixed(1)
                 )
               : null;
+          const vsAvgPct =
+            comparison.allTime.avgPlaysPerYear > 0
+              ? Number(
+                  (
+                    ((s.totalPlays - comparison.allTime.avgPlaysPerYear) /
+                      comparison.allTime.avgPlaysPerYear) *
+                    100
+                  ).toFixed(1)
+                )
+              : null;
+          const shareOfAllTime =
+            comparison.allTime.totalPlays > 0
+              ? Number(((s.totalPlays / comparison.allTime.totalPlays) * 100).toFixed(1))
+              : 0;
           const color = YEAR_COLORS[idx % YEAR_COLORS.length];
 
           return (
@@ -227,7 +267,22 @@ export const CompareView: React.FC<CompareViewProps> = ({
                 </div>
               </div>
 
-              <div className="space-y-1.5 pt-1 border-t border-zinc-800/60 text-xs">
+              <div className="space-y-1.5 pt-2 border-t border-zinc-800/60 text-xs">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-zinc-500">vs All Years</span>
+                  <span className="font-medium text-zinc-300">
+                    {shareOfAllTime}% of total
+                    {vsAvgPct !== null && (
+                      <span
+                        className={`ml-2 font-semibold ${
+                          vsAvgPct >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                        }`}
+                      >
+                        ({vsAvgPct >= 0 ? `+${vsAvgPct}%` : `${vsAvgPct}%`} vs yr avg)
+                      </span>
+                    )}
+                  </span>
+                </div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-zinc-500">#1 Artist</span>
                   <span className="font-medium text-zinc-200 truncate">
@@ -252,13 +307,26 @@ export const CompareView: React.FC<CompareViewProps> = ({
 
       {/* Monthly Overlay Chart (Jan - Dec) */}
       <div className="rounded-2xl border border-zinc-800/80 bg-[#101015] p-5">
-        <div className="mb-4">
-          <h3 className="text-base font-semibold text-white">
-            Month-by-Month Overlay (Jan – Dec)
-          </h3>
-          <p className="text-xs text-zinc-400">
-            Compare {metric} across each month of the selected years
-          </p>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 className="text-base font-semibold text-white">
+              Month-by-Month Overlay (Jan – Dec)
+            </h3>
+            <p className="text-xs text-zinc-400">
+              Compare {metric} across each month of the selected years
+            </p>
+          </div>
+          {chartType === 'line' && (
+            <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={showAllAvg}
+                onChange={(e) => setShowAllAvg(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 accent-zinc-400"
+              />
+              Show All-Years Avg
+            </label>
+          )}
         </div>
         <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -311,6 +379,18 @@ export const CompareView: React.FC<CompareViewProps> = ({
                     </Line>
                   );
                 })}
+                {showAllAvg && (
+                  <Line
+                    type="monotone"
+                    dataKey="allAvg"
+                    name="All-Years Avg"
+                    stroke="#a1a1aa"
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    dot={false}
+                    activeDot={{ r: 4, fill: '#e4e4e7' }}
+                  />
+                )}
               </LineChart>
             ) : (
               <BarChart
@@ -382,7 +462,8 @@ export const CompareView: React.FC<CompareViewProps> = ({
                     {y}
                   </th>
                 ))}
-                <th className="py-3 pl-3 pr-5 text-right">Combined</th>
+                <th className="py-3 px-3 text-right">Selected</th>
+                <th className="py-3 pl-3 pr-5 text-right">All-Time</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/50">
@@ -399,8 +480,11 @@ export const CompareView: React.FC<CompareViewProps> = ({
                       {(row.byYear[y] ?? 0).toLocaleString()}
                     </td>
                   ))}
-                  <td className="py-3 pl-3 pr-5 text-right font-semibold text-white font-mono text-xs">
+                  <td className="py-3 px-3 text-right font-semibold text-white font-mono text-xs">
                     {row.totalPlays.toLocaleString()}
+                  </td>
+                  <td className="py-3 pl-3 pr-5 text-right text-zinc-400 font-mono text-xs">
+                    {row.allTimePlays.toLocaleString()}
                   </td>
                 </tr>
               ))}
