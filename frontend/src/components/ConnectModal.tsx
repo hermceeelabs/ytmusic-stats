@@ -10,6 +10,7 @@ import {
   X,
 } from 'lucide-react';
 import type { TakeoutStats, YTMusicStatus } from '../types';
+import { parseTakeoutFile } from '../utils/takeoutParser';
 
 interface ConnectModalProps {
   isOpen: boolean;
@@ -54,22 +55,11 @@ export const ConnectModal: React.FC<ConnectModalProps> = ({
     setUploadError(null);
     setUploadResult(null);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('include_youtube_general', String(includeGeneral));
-
-      const res = await fetch('/api/takeout/parse', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.detail || 'Failed to parse Takeout file.');
-      }
+      const data = await parseTakeoutFile(file, includeGeneral);
       setUploadResult(data.stats);
       onTakeoutUploaded(data.events, data.stats);
     } catch (err: any) {
-      setUploadError(err.message || 'Upload failed.');
+      setUploadError(err.message || 'Failed to parse Takeout file.');
     } finally {
       setUploading(false);
     }
