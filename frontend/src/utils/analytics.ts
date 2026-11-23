@@ -554,4 +554,17 @@ export function computeYearlyComparison(
   };
 }
 
+export function formatListeningSpan(totalMinutes: number): string {
+  const days = totalMinutes / 1440;
+  const weeks = days / 7;
+  const months = days / 30.4375;
+  const years = days / 365.25;
+
+  const parts: string[] = [`${days.toFixed(1)} days`];
+  if (weeks >= 1) parts.push(`${weeks.toFixed(1)} wks`);
+  if (months >= 1) parts.push(`${months.toFixed(1)} mos`);
+  if (years >= 1) parts.push(`${years.toFixed(2)} yrs`);
+  return parts.join(' · ');
+}
+
 export { DAY_NAMES };

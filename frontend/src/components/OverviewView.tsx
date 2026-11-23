@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 import { Clock, Disc3, Flame, Headphones, Music2, Users } from 'lucide-react';
 import type { AnalyticsSummary, Granularity } from '../types';
-import { DAY_NAMES } from '../utils/analytics';
+import { DAY_NAMES, formatListeningSpan } from '../utils/analytics';
 
 interface OverviewViewProps {
   summary: AnalyticsSummary;
@@ -54,7 +54,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
     {
       label: 'Listening Time',
       value: `${summary.totalHours.toLocaleString()} hrs`,
-      sub: `${summary.totalMinutes.toLocaleString()} minutes`,
+      sub: `${summary.totalMinutes.toLocaleString()} mins · ${formatListeningSpan(summary.totalMinutes)}`,
       icon: Clock,
       accent: 'text-violet-400 bg-violet-500/10',
     },

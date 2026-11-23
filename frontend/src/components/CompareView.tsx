@@ -14,7 +14,7 @@ import {
 } from 'recharts';
 import { ArrowDownRight, ArrowUpRight, GitCompareArrows, Pin, PinOff } from 'lucide-react';
 import type { PlayEvent } from '../types';
-import { computeYearlyComparison } from '../utils/analytics';
+import { computeYearlyComparison, formatListeningSpan } from '../utils/analytics';
 
 interface CompareViewProps {
   events: PlayEvent[];
@@ -166,7 +166,12 @@ export const CompareView: React.FC<CompareViewProps> = ({
             <strong className="text-white">{comparison.allTime.totalPlays.toLocaleString()}</strong> total plays
           </span>
           <span className="text-zinc-400">
-            <strong className="text-white">{comparison.allTime.totalHours.toLocaleString()} hrs</strong> ({comparison.allTime.totalMinutes.toLocaleString()} mins)
+            <strong className="text-white">{comparison.allTime.totalHours.toLocaleString()} hrs</strong>{' '}
+            ({comparison.allTime.totalMinutes.toLocaleString()} mins ·{' '}
+            <strong className="text-zinc-200">
+              {formatListeningSpan(comparison.allTime.totalMinutes)}
+            </strong>
+            )
           </span>
         </div>
         <div className="text-zinc-400">
@@ -251,6 +256,9 @@ export const CompareView: React.FC<CompareViewProps> = ({
                   </div>
                   <div className="text-[11px] text-zinc-400 mt-0.5">
                     {s.totalMinutes.toLocaleString()} mins
+                  </div>
+                  <div className="text-[11px] text-rose-300/90 mt-0.5">
+                    {formatListeningSpan(s.totalMinutes)}
                   </div>
                 </div>
                 <div className="rounded-xl bg-zinc-900/60 border border-zinc-800/70 p-3">

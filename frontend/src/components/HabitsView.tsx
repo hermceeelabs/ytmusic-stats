@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import { Award, Calendar, Check, Copy, Sparkles, TrendingUp } from 'lucide-react';
 import type { AnalyticsSummary } from '../types';
+import { formatListeningSpan } from '../utils/analytics';
 
 interface HabitsViewProps {
   summary: AnalyticsSummary;
@@ -26,7 +27,7 @@ export const HabitsView: React.FC<HabitsViewProps> = ({ summary }) => {
     const lines = [
       `🎧 My YouTube Music Stats`,
       `• Archetype: ${summary.archetype.title}`,
-      `• Total Plays: ${summary.totalPlays.toLocaleString()} (${summary.totalHours} hrs)`,
+      `• Total Plays: ${summary.totalPlays.toLocaleString()} (${summary.totalHours} hrs / ${formatListeningSpan(summary.totalMinutes)})`,
       `• Unique Artists: ${summary.uniqueArtists.toLocaleString()} | Tracks: ${summary.uniqueTracks.toLocaleString()}`,
       topArtist ? `• #1 Artist: ${topArtist.name} (${topArtist.plays} plays)` : '',
       topTrack ? `• #1 Track: ${topTrack.title} by ${topTrack.artist} (${topTrack.plays} plays)` : '',
