@@ -49,7 +49,7 @@ export function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('overview');
   const [visitedTabs, setVisitedTabs] = useState<Set<NavTab>>(() => new Set(['overview']));
   const [dateFilter, setDateFilter] = useState<DateFilter>({
-    preset: 'all',
+    preset: 'ytd',
     year: null,
     month: null,
   });
