@@ -14,6 +14,7 @@ import {
 import { Clock, Disc3, Flame, Headphones, Music2, Users } from 'lucide-react';
 import type { AnalyticsSummary, Granularity } from '../types';
 import { DAY_NAMES, formatListeningSpan } from '../utils/analytics';
+import { usePersistedState } from '../utils/storage';
 
 interface OverviewViewProps {
   summary: AnalyticsSummary;
@@ -30,7 +31,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   onSelectArtist,
   onViewAllCharts,
 }) => {
-  const [metric, setMetric] = useState<'plays' | 'minutes'>('plays');
+  const [metric, setMetric] = usePersistedState<'plays' | 'minutes'>('ytm_overview_metric', 'plays');
 
   const maxHeat = Math.max(
     1,

@@ -28,7 +28,7 @@ import {
   filterEventsByDateRange,
   getAvailableYears,
 } from './utils/analytics';
-import { loadFromDB, saveToDB } from './utils/storage';
+import { loadFromDB, saveToDB, usePersistedState } from './utils/storage';
 
 const MONTHS = [
   'January',
@@ -46,15 +46,15 @@ const MONTHS = [
 ];
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<NavTab>('overview');
-  const [visitedTabs, setVisitedTabs] = useState<Set<NavTab>>(() => new Set(['overview']));
-  const [dateFilter, setDateFilter] = useState<DateFilter>({
+  const [activeTab, setActiveTab] = usePersistedState<NavTab>('ytm_active_tab', 'overview');
+  const [visitedTabs, setVisitedTabs] = useState<Set<NavTab>>(() => new Set([activeTab]));
+  const [dateFilter, setDateFilter] = usePersistedState<DateFilter>('ytm_date_filter', {
     preset: 'ytd',
     year: null,
     month: null,
   });
-  const [granularity, setGranularity] = useState<Granularity>('month');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [granularity, setGranularity] = usePersistedState<Granularity>('ytm_granularity', 'month');
+  const [searchQuery, setSearchQuery] = usePersistedState<string>('ytm_search_query', '');
   const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
   const [connectOpen, setConnectOpen] = useState(false);
 

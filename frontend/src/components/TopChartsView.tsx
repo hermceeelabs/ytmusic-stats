@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ExternalLink, Music2, Search, Users, X } from 'lucide-react';
 import type { AnalyticsSummary, PlayEvent } from '../types';
+import { usePersistedState } from '../utils/storage';
 
 interface TopChartsViewProps {
   summary: AnalyticsSummary;
@@ -15,9 +16,9 @@ export const TopChartsView: React.FC<TopChartsViewProps> = ({
   selectedArtist,
   onSelectArtist,
 }) => {
-  const [chartTab, setChartTab] = useState<'artists' | 'tracks'>('artists');
+  const [chartTab, setChartTab] = usePersistedState<'artists' | 'tracks'>('ytm_charts_tab', 'artists');
   const [localQuery, setLocalQuery] = useState('');
-  const [limit, setLimit] = useState<number>(50);
+  const [limit, setLimit] = usePersistedState<number>('ytm_charts_limit', 50);
 
   const artists = useMemo(() => {
     const q = localQuery.trim().toLowerCase();

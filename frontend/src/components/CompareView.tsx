@@ -15,6 +15,7 @@ import {
 import { ArrowDownRight, ArrowUpRight, GitCompareArrows, Pin, PinOff } from 'lucide-react';
 import type { PlayEvent } from '../types';
 import { computeYearlyComparison, formatListeningSpan } from '../utils/analytics';
+import { usePersistedState } from '../utils/storage';
 
 interface CompareViewProps {
   events: PlayEvent[];
@@ -29,13 +30,14 @@ export const CompareView: React.FC<CompareViewProps> = ({
   availableYears,
   onSelectArtist,
 }) => {
-  const [selectedYears, setSelectedYears] = useState<number[]>(() =>
+  const [selectedYears, setSelectedYears] = usePersistedState<number[]>(
+    'ytm_compare_years',
     availableYears.slice(0, 2)
   );
-  const [metric, setMetric] = useState<'plays' | 'minutes'>('plays');
-  const [chartType, setChartType] = useState<'line' | 'bar'>('line');
-  const [pinned, setPinned] = useState<boolean>(true);
-  const [showAllAvg, setShowAllAvg] = useState<boolean>(true);
+  const [metric, setMetric] = usePersistedState<'plays' | 'minutes'>('ytm_compare_metric', 'plays');
+  const [chartType, setChartType] = usePersistedState<'line' | 'bar'>('ytm_compare_chart_type', 'line');
+  const [pinned, setPinned] = usePersistedState<boolean>('ytm_compare_pinned', true);
+  const [showAllAvg, setShowAllAvg] = usePersistedState<boolean>('ytm_compare_show_all_avg', true);
 
   useEffect(() => {
     setSelectedYears((prev) => {

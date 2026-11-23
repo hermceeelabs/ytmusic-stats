@@ -1,4 +1,28 @@
-import type { PlayEvent, YTMusicLibrary } from '../types';
+import { useEffect, useState } from 'react';
+
+export function usePersistedState<T>(key: string, defaultValue: T) {
+  const [state, setState] = useState<T>(() => {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw !== null) {
+        return JSON.parse(raw) as T;
+      }
+    } catch {
+      // ignore invalid JSON or storage access errors
+    }
+    return defaultValue;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(key, JSON.stringify(state));
+    } catch {
+      // ignore storage quota errors
+    }
+  }, [key, state]);
+
+  return [state, setState] as const;
+}
 
 const DB_NAME = 'ytm_stats_db';
 const DB_VERSION = 1;
@@ -61,7 +85,3 @@ export async function clearDB(): Promise<void> {
   }
 }
 
-export interface PersistedState {
-  takeoutEvents: PlayEvent[];
-  liveLibrary: YTMusicLibrary | null;
-}
