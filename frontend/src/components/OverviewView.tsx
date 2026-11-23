@@ -5,6 +5,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  LabelList,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -161,7 +162,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
 
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={summary.timeSeries} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+              <AreaChart data={summary.timeSeries} margin={{ top: 20, right: 12, left: -16, bottom: 0 }}>
                 <defs>
                   <linearGradient id="roseGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.4} />
@@ -191,10 +192,27 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                   type="monotone"
                   dataKey={metric}
                   stroke="#f43f5e"
-                  strokeWidth={2.2}
+                  strokeWidth={2.4}
                   fillOpacity={1}
                   fill="url(#roseGrad)"
-                />
+                  dot={
+                    summary.timeSeries.length <= 90
+                      ? { r: 4, fill: '#f43f5e', stroke: '#070709', strokeWidth: 1.5 }
+                      : false
+                  }
+                  activeDot={{ r: 6, fill: '#fb7185', stroke: '#ffffff', strokeWidth: 1.5 }}
+                >
+                  {summary.timeSeries.length <= 35 && (
+                    <LabelList
+                      dataKey={metric}
+                      position="top"
+                      offset={8}
+                      fill="#e4e4e7"
+                      fontSize={10}
+                      fontWeight={600}
+                    />
+                  )}
+                </Area>
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -233,7 +251,15 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                     color: '#f4f4f5',
                   }}
                 />
-                <Bar dataKey="plays" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="plays" fill="#8b5cf6" radius={[4, 4, 0, 0]}>
+                  <LabelList
+                    dataKey="plays"
+                    position="top"
+                    fill="#a1a1aa"
+                    fontSize={9}
+                    formatter={(v: unknown) => (Number(v) > 0 ? String(v) : '')}
+                  />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>

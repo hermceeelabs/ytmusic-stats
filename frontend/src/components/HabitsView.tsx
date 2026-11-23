@@ -3,6 +3,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  LabelList,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -149,7 +150,17 @@ export const HabitsView: React.FC<HabitsViewProps> = ({ summary }) => {
                     color: '#f4f4f5',
                   }}
                 />
-                <Bar dataKey="newArtists" name="New Artists" fill="#06b6d4" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="newArtists" name="New Artists" fill="#06b6d4" radius={[4, 4, 0, 0]}>
+                  {summary.timeSeries.length <= 35 && (
+                    <LabelList
+                      dataKey="newArtists"
+                      position="top"
+                      fill="#e4e4e7"
+                      fontSize={10}
+                      formatter={(v: unknown) => (Number(v) > 0 ? String(v) : '')}
+                    />
+                  )}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>

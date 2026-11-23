@@ -3,6 +3,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  LabelList,
   Legend,
   Line,
   LineChart,
@@ -267,18 +268,31 @@ export const CompareView: React.FC<CompareViewProps> = ({
                   }}
                 />
                 <Legend wrapperStyle={{ fontSize: '12px' }} />
-                {comparison.years.map((y, idx) => (
-                  <Line
-                    key={y}
-                    type="monotone"
-                    dataKey={String(y)}
-                    name={String(y)}
-                    stroke={YEAR_COLORS[idx % YEAR_COLORS.length]}
-                    strokeWidth={2.5}
-                    dot={{ r: 3 }}
-                    activeDot={{ r: 5 }}
-                  />
-                ))}
+                {comparison.years.map((y, idx) => {
+                  const color = YEAR_COLORS[idx % YEAR_COLORS.length];
+                  return (
+                    <Line
+                      key={y}
+                      type="monotone"
+                      dataKey={String(y)}
+                      name={String(y)}
+                      stroke={color}
+                      strokeWidth={2.5}
+                      dot={{ r: 4.5, fill: color, stroke: '#070709', strokeWidth: 1.5 }}
+                      activeDot={{ r: 6.5, stroke: '#ffffff', strokeWidth: 1.5 }}
+                    >
+                      <LabelList
+                        dataKey={String(y)}
+                        position="top"
+                        offset={8}
+                        fill={color}
+                        fontSize={10}
+                        fontWeight={600}
+                        formatter={(v: unknown) => (Number(v) > 0 ? String(v) : '')}
+                      />
+                    </Line>
+                  );
+                })}
               </LineChart>
             ) : (
               <BarChart
@@ -311,7 +325,17 @@ export const CompareView: React.FC<CompareViewProps> = ({
                     name={String(y)}
                     fill={YEAR_COLORS[idx % YEAR_COLORS.length]}
                     radius={[4, 4, 0, 0]}
-                  />
+                  >
+                    {comparison.years.length <= 3 && (
+                      <LabelList
+                        dataKey={String(y)}
+                        position="top"
+                        fill="#e4e4e7"
+                        fontSize={10}
+                        formatter={(v: unknown) => (Number(v) > 0 ? String(v) : '')}
+                      />
+                    )}
+                  </Bar>
                 ))}
               </BarChart>
             )}
