@@ -320,10 +320,10 @@ export function App() {
                   value={dateFilter.year ?? ''}
                   onChange={(e) => handleYearChange(e.target.value)}
                   aria-label="Filter by year"
-                  className={`rounded-xl border px-3 py-1.5 text-xs font-medium focus:border-rose-500 focus:outline-none transition ${
+                  className={`rounded-xl border bg-[#101015] px-3 py-1.5 text-xs font-medium focus:border-rose-500 focus:outline-none transition ${
                     dateFilter.preset === 'custom' && dateFilter.year !== null
-                      ? 'border-rose-500/60 bg-rose-500/10 text-white'
-                      : 'border-zinc-800 bg-[#101015] text-zinc-300'
+                      ? 'border-rose-500 text-white'
+                      : 'border-zinc-800 text-zinc-300'
                   }`}
                 >
                   <option value="">All Years</option>
@@ -338,10 +338,10 @@ export function App() {
                   value={dateFilter.month ?? ''}
                   onChange={(e) => handleMonthChange(e.target.value)}
                   aria-label="Filter by month"
-                  className={`rounded-xl border px-3 py-1.5 text-xs font-medium focus:border-rose-500 focus:outline-none transition ${
+                  className={`rounded-xl border bg-[#101015] px-3 py-1.5 text-xs font-medium focus:border-rose-500 focus:outline-none transition ${
                     dateFilter.preset === 'custom' && dateFilter.month !== null
-                      ? 'border-rose-500/60 bg-rose-500/10 text-white'
-                      : 'border-zinc-800 bg-[#101015] text-zinc-300'
+                      ? 'border-rose-500 text-white'
+                      : 'border-zinc-800 text-zinc-300'
                   }`}
                 >
                   <option value="">All Months</option>
