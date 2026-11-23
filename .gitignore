@@ -1,0 +1,13 @@
+# Dependencies & Virtualenvs
+backend/.venv/
+backend/__pycache__/
+backend/*.pyc
+backend/.ytmusic_auth.json
+frontend/node_modules/
+frontend/dist/
+.vercel/
+
+# OS & Logs
+.DS_Store
+Thumbs.db
+*.log
