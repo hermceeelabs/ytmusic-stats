@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   BarChart3,
   Database,
+  GitCompareArrows,
   LayoutDashboard,
   Library,
   Loader2,
@@ -10,6 +11,7 @@ import {
   Sparkles,
   UploadCloud,
 } from 'lucide-react';
+import { CompareView } from './components/CompareView';
 import { ConnectModal } from './components/ConnectModal';
 import { HabitsView } from './components/HabitsView';
 import { LibraryView } from './components/LibraryView';
@@ -202,6 +204,7 @@ export function App() {
               { id: 'overview', label: 'Overview', icon: LayoutDashboard },
               { id: 'charts', label: 'Top Charts', icon: BarChart3 },
               { id: 'habits', label: 'Habits & Wrapped', icon: Sparkles },
+              { id: 'compare', label: 'Compare Years', icon: GitCompareArrows },
               { id: 'library', label: 'Live Library', icon: Library },
             ].map((item) => {
               const Icon = item.icon;
@@ -250,6 +253,7 @@ export function App() {
             { id: 'overview', label: 'Overview' },
             { id: 'charts', label: 'Top Charts' },
             { id: 'habits', label: 'Habits' },
+            { id: 'compare', label: 'Compare' },
             { id: 'library', label: 'Library' },
           ].map((item) => (
             <button
@@ -286,8 +290,8 @@ export function App() {
           </div>
         )}
 
-        {/* Global Filter Bar (shown on analytics tabs) */}
-        {activeTab !== 'library' && (
+        {/* Global Filter Bar (shown on single-period analytics tabs) */}
+        {activeTab !== 'library' && activeTab !== 'compare' && (
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <div className="flex flex-wrap items-center gap-1 rounded-xl bg-zinc-900/70 p-1 border border-zinc-800/80">
@@ -392,6 +396,13 @@ export function App() {
               />
             )}
             {activeTab === 'habits' && <HabitsView summary={summary} />}
+            {activeTab === 'compare' && (
+              <CompareView
+                events={activeEvents}
+                availableYears={availableYears}
+                onSelectArtist={handleSelectArtistFromOverview}
+              />
+            )}
             {activeTab === 'library' && (
               <LibraryView
                 library={activeLibrary}

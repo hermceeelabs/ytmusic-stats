@@ -427,4 +427,88 @@ export function computeAnalytics(
   };
 }
 
+export interface YearComparisonData {
+  years: number[];
+  summaries: Record<number, AnalyticsSummary>;
+  monthlyOverlay: Array<Record<string, string | number>>;
+  artistMatrix: Array<{
+    name: string;
+    totalPlays: number;
+    byYear: Record<number, number>;
+  }>;
+}
+
+const SHORT_MONTHS = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+export function computeYearlyComparison(
+  events: PlayEvent[],
+  selectedYears: number[],
+  metric: 'plays' | 'minutes' = 'plays'
+): YearComparisonData {
+  const sortedYears = [...selectedYears].sort((a, b) => a - b);
+  const summaries: Record<number, AnalyticsSummary> = {};
+  const monthBuckets: Array<Record<string, string | number>> = SHORT_MONTHS.map((m) => ({
+    month: m,
+  }));
+
+  const eventsByYear = new Map<number, PlayEvent[]>();
+  for (const y of sortedYears) {
+    eventsByYear.set(y, []);
+    for (const row of monthBuckets) {
+      row[String(y)] = 0;
+    }
+  }
+
+  for (const ev of events) {
+    const d = new Date(ev.playedAt);
+    if (Number.isNaN(d.getTime())) continue;
+    const y = d.getFullYear();
+    const list = eventsByYear.get(y);
+    if (!list) continue;
+    list.push(ev);
+    const mIdx = d.getMonth();
+    const val = metric === 'plays' ? 1 : (ev.durationSec || 210) / 60;
+    monthBuckets[mIdx][String(y)] = Number(
+      ((monthBuckets[mIdx][String(y)] as number) + val).toFixed(1)
+    );
+  }
+
+  const artistTotals = new Map<string, { total: number; byYear: Record<number, number> }>();
+
+  for (const y of sortedYears) {
+    const yearEvents = eventsByYear.get(y) ?? [];
+    const summary = computeAnalytics(yearEvents, 'month');
+    summaries[y] = summary;
+
+    for (const a of summary.topArtists) {
+      let entry = artistTotals.get(a.name);
+      if (!entry) {
+        entry = { total: 0, byYear: {} };
+        artistTotals.set(a.name, entry);
+      }
+      entry.total += a.plays;
+      entry.byYear[y] = a.plays;
+    }
+  }
+
+  const artistMatrix = Array.from(artistTotals.entries())
+    .sort((a, b) => b[1].total - a[1].total)
+    .slice(0, 20)
+    .map(([name, data]) => ({
+      name,
+      totalPlays: data.total,
+      byYear: data.byYear,
+    }));
+
+  return {
+    years: sortedYears,
+    summaries,
+    monthlyOverlay: monthBuckets,
+    artistMatrix,
+  };
+}
+
 export { DAY_NAMES };
