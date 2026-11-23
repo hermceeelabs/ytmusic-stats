@@ -1,6 +1,12 @@
 export type DataSourceMode = 'demo' | 'takeout' | 'live' | 'merged';
 
-export type DateRangePreset = 'all' | '30d' | '90d' | '1y' | 'ytd';
+export type DateRangePreset = 'all' | '30d' | '90d' | '1y' | 'ytd' | 'custom';
+
+export interface DateFilter {
+  preset: DateRangePreset;
+  year: number | null;
+  month: number | null; // 0-indexed (0 = Jan, 11 = Dec)
+}
 
 export type Granularity = 'day' | 'week' | 'month';
 

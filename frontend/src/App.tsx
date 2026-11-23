@@ -16,6 +16,7 @@ import { LibraryView } from './components/LibraryView';
 import { OverviewView } from './components/OverviewView';
 import { TopChartsView } from './components/TopChartsView';
 import type {
+  DateFilter,
   DateRangePreset,
   Granularity,
   NavTab,
@@ -24,12 +25,35 @@ import type {
   YTMusicLibrary,
   YTMusicStatus,
 } from './types';
-import { computeAnalytics, filterEventsByDateRange } from './utils/analytics';
+import {
+  computeAnalytics,
+  filterEventsByDateRange,
+  getAvailableYears,
+} from './utils/analytics';
 import { loadFromDB, saveToDB } from './utils/storage';
+
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 
 export function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('overview');
-  const [datePreset, setDatePreset] = useState<DateRangePreset>('all');
+  const [dateFilter, setDateFilter] = useState<DateFilter>({
+    preset: 'all',
+    year: null,
+    month: null,
+  });
   const [granularity, setGranularity] = useState<Granularity>('month');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
@@ -80,10 +104,43 @@ export function App() {
   );
   const activeLibrary = liveLibrary || (isDemo ? demoLibrary : null);
 
-  const filteredEvents = useMemo(
-    () => filterEventsByDateRange(activeEvents, datePreset, searchQuery),
-    [activeEvents, datePreset, searchQuery]
+  const availableYears = useMemo(
+    () => getAvailableYears(activeEvents),
+    [activeEvents]
   );
+
+  const filteredEvents = useMemo(
+    () => filterEventsByDateRange(activeEvents, dateFilter, searchQuery),
+    [activeEvents, dateFilter, searchQuery]
+  );
+
+  const handlePresetClick = (preset: DateRangePreset) => {
+    setDateFilter({ preset, year: null, month: null });
+    if (preset === '30d' || preset === '90d') setGranularity('day');
+    else setGranularity('month');
+  };
+
+  const handleYearChange = (val: string) => {
+    const year = val === '' ? null : Number(val);
+    if (year === null && dateFilter.month === null) {
+      setDateFilter({ preset: 'all', year: null, month: null });
+      setGranularity('month');
+    } else {
+      setDateFilter({ preset: 'custom', year, month: dateFilter.month });
+      setGranularity(dateFilter.month !== null ? 'day' : 'month');
+    }
+  };
+
+  const handleMonthChange = (val: string) => {
+    const month = val === '' ? null : Number(val);
+    if (month === null && dateFilter.year === null) {
+      setDateFilter({ preset: 'all', year: null, month: null });
+      setGranularity('month');
+    } else {
+      setDateFilter({ preset: 'custom', year: dateFilter.year, month });
+      setGranularity(month !== null ? 'day' : 'month');
+    }
+  };
 
   const summary = useMemo(
     () => computeAnalytics(filteredEvents, granularity),
@@ -232,28 +289,69 @@ export function App() {
         {/* Global Filter Bar (shown on analytics tabs) */}
         {activeTab !== 'library' && (
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-1.5 rounded-xl bg-zinc-900/70 p-1 border border-zinc-800/80">
-              {(
-                [
-                  { id: 'all', label: 'All Time' },
-                  { id: '30d', label: '30 Days' },
-                  { id: '90d', label: '90 Days' },
-                  { id: '1y', label: '1 Year' },
-                  { id: 'ytd', label: 'YTD' },
-                ] as { id: DateRangePreset; label: string }[]
-              ).map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setDatePreset(p.id)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
-                    datePreset === p.id
-                      ? 'bg-zinc-800 text-white'
-                      : 'text-zinc-400 hover:text-zinc-200'
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1 rounded-xl bg-zinc-900/70 p-1 border border-zinc-800/80">
+                {(
+                  [
+                    { id: 'all', label: 'All Time' },
+                    { id: '30d', label: '30 Days' },
+                    { id: '90d', label: '90 Days' },
+                    { id: '1y', label: 'Last 365d' },
+                    { id: 'ytd', label: 'YTD' },
+                  ] as { id: DateRangePreset; label: string }[]
+                ).map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => handlePresetClick(p.id)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                      dateFilter.preset === p.id
+                        ? 'bg-zinc-800 text-white'
+                        : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Year -> Month selectors */}
+              <div className="flex items-center gap-1.5">
+                <select
+                  value={dateFilter.year ?? ''}
+                  onChange={(e) => handleYearChange(e.target.value)}
+                  aria-label="Filter by year"
+                  className={`rounded-xl border px-3 py-1.5 text-xs font-medium focus:border-rose-500 focus:outline-none transition ${
+                    dateFilter.preset === 'custom' && dateFilter.year !== null
+                      ? 'border-rose-500/60 bg-rose-500/10 text-white'
+                      : 'border-zinc-800 bg-[#101015] text-zinc-300'
                   }`}
                 >
-                  {p.label}
-                </button>
-              ))}
+                  <option value="">All Years</option>
+                  {availableYears.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={dateFilter.month ?? ''}
+                  onChange={(e) => handleMonthChange(e.target.value)}
+                  aria-label="Filter by month"
+                  className={`rounded-xl border px-3 py-1.5 text-xs font-medium focus:border-rose-500 focus:outline-none transition ${
+                    dateFilter.preset === 'custom' && dateFilter.month !== null
+                      ? 'border-rose-500/60 bg-rose-500/10 text-white'
+                      : 'border-zinc-800 bg-[#101015] text-zinc-300'
+                  }`}
+                >
+                  <option value="">All Months</option>
+                  {MONTHS.map((mName, idx) => (
+                    <option key={mName} value={idx}>
+                      {mName}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="relative w-full sm:w-72">

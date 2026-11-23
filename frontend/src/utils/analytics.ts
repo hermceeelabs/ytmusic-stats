@@ -1,7 +1,7 @@
 import type {
   AnalyticsSummary,
   ArtistStat,
-  DateRangePreset,
+  DateFilter,
   Granularity,
   PlayEvent,
   TrackStat,
@@ -10,30 +10,49 @@ import type {
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const FULL_DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+export function getAvailableYears(events: PlayEvent[]): number[] {
+  const years = new Set<number>();
+  for (const ev of events) {
+    const d = new Date(ev.playedAt);
+    if (!Number.isNaN(d.getTime())) {
+      years.add(d.getFullYear());
+    }
+  }
+  return Array.from(years).sort((a, b) => b - a);
+}
+
 export function filterEventsByDateRange(
   events: PlayEvent[],
-  preset: DateRangePreset,
+  filter: DateFilter,
   searchQuery: string = ''
 ): PlayEvent[] {
   const now = new Date();
   let cutoff: number | null = null;
 
-  if (preset === '30d') {
+  if (filter.preset === '30d') {
     cutoff = now.getTime() - 30 * 86400 * 1000;
-  } else if (preset === '90d') {
+  } else if (filter.preset === '90d') {
     cutoff = now.getTime() - 90 * 86400 * 1000;
-  } else if (preset === '1y') {
+  } else if (filter.preset === '1y') {
     cutoff = now.getTime() - 365 * 86400 * 1000;
-  } else if (preset === 'ytd') {
+  } else if (filter.preset === 'ytd') {
     cutoff = new Date(now.getFullYear(), 0, 1).getTime();
   }
 
   const q = searchQuery.trim().toLowerCase();
 
   return events.filter((ev) => {
-    const t = Date.parse(ev.playedAt);
+    const d = new Date(ev.playedAt);
+    const t = d.getTime();
     if (Number.isNaN(t)) return false;
-    if (cutoff !== null && t < cutoff) return false;
+
+    if (filter.preset === 'custom') {
+      if (filter.year !== null && d.getFullYear() !== filter.year) return false;
+      if (filter.month !== null && d.getMonth() !== filter.month) return false;
+    } else if (cutoff !== null && t < cutoff) {
+      return false;
+    }
+
     if (q) {
       const hay = `${ev.title} ${ev.artist} ${ev.album ?? ''}`.toLowerCase();
       if (!hay.includes(q)) return false;
