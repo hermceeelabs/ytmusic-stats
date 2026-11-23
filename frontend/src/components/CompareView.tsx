@@ -12,7 +12,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { ArrowDownRight, ArrowUpRight, GitCompareArrows } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, GitCompareArrows, Pin, PinOff } from 'lucide-react';
 import type { PlayEvent } from '../types';
 import { computeYearlyComparison } from '../utils/analytics';
 
@@ -34,6 +34,7 @@ export const CompareView: React.FC<CompareViewProps> = ({
   );
   const [metric, setMetric] = useState<'plays' | 'minutes'>('plays');
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
+  const [pinned, setPinned] = useState<boolean>(true);
 
   useEffect(() => {
     setSelectedYears((prev) => {
@@ -69,7 +70,11 @@ export const CompareView: React.FC<CompareViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Year Selector Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-zinc-800/80 bg-[#101015] p-4">
+      <div
+        className={`flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-zinc-800/80 bg-[#101015]/95 backdrop-blur-md p-4 transition ${
+          pinned ? 'sticky top-[4.25rem] z-20 shadow-xl shadow-black/40' : ''
+        }`}
+      >
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-white">
             <GitCompareArrows className="h-4 w-4 text-rose-400" />
@@ -135,6 +140,18 @@ export const CompareView: React.FC<CompareViewProps> = ({
               </button>
             ))}
           </div>
+          <button
+            onClick={() => setPinned((p) => !p)}
+            title={pinned ? 'Unpin toolbar' : 'Pin toolbar to top while scrolling'}
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${
+              pinned
+                ? 'border-rose-500/50 bg-rose-500/10 text-rose-300'
+                : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            {pinned ? <Pin className="h-3.5 w-3.5" /> : <PinOff className="h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">{pinned ? 'Pinned' : 'Pin'}</span>
+          </button>
         </div>
       </div>
 
@@ -193,6 +210,9 @@ export const CompareView: React.FC<CompareViewProps> = ({
                   <div className="text-zinc-400">Listening Time</div>
                   <div className="text-lg font-bold text-white mt-0.5">
                     {s.totalHours.toLocaleString()} hrs
+                  </div>
+                  <div className="text-[11px] text-zinc-400 mt-0.5">
+                    {s.totalMinutes.toLocaleString()} mins
                   </div>
                 </div>
                 <div className="rounded-xl bg-zinc-900/60 border border-zinc-800/70 p-3">
