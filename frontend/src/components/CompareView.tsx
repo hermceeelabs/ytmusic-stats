@@ -183,10 +183,8 @@ export const CompareView: React.FC<CompareViewProps> = ({
                 </div>
                 {deltaPct !== null && (
                   <span
-                    className={`inline-flex items-center gap-0.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      deltaPct >= 0
-                        ? 'bg-emerald-500/15 text-emerald-400'
-                        : 'bg-rose-500/15 text-rose-400'
+                    className={`inline-flex items-center gap-0.5 text-xs font-semibold ${
+                      deltaPct >= 0 ? 'text-emerald-400' : 'text-rose-400'
                     }`}
                   >
                     {deltaPct >= 0 ? (

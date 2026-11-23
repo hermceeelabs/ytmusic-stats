@@ -137,8 +137,8 @@ export const ConnectModal: React.FC<ConnectModalProps> = ({
             <FileArchive className="h-4 w-4" />
             Google Takeout (Full History)
             {takeoutCount > 0 && (
-              <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] text-emerald-400">
-                {takeoutCount.toLocaleString()} plays
+              <span className="text-[11px] text-emerald-400">
+                ({takeoutCount.toLocaleString()})
               </span>
             )}
           </button>
@@ -153,8 +153,8 @@ export const ConnectModal: React.FC<ConnectModalProps> = ({
             <KeyRound className="h-4 w-4" />
             Live YT Music Sync
             {ytStatus.connected && (
-              <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] text-emerald-400">
-                Connected
+              <span className="text-[11px] text-emerald-400">
+                · Connected
               </span>
             )}
           </button>

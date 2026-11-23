@@ -191,7 +191,7 @@ export function App() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-base tracking-tight text-white">Pulse</span>
-                <span className="rounded-md bg-zinc-800 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-300">
+                <span className="text-xs font-medium text-zinc-400">
                   YT Music Stats
                 </span>
               </div>
@@ -226,8 +226,8 @@ export function App() {
           </nav>
 
           {/* Data Status & Connect CTA */}
-          <div className="flex items-center gap-2.5">
-            <div className="hidden sm:flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/70 px-3 py-1 text-xs">
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-1.5 text-xs">
               <Database className="h-3.5 w-3.5 text-zinc-400" />
               {isDemo ? (
                 <span className="text-amber-300 font-medium">Demo Data</span>
