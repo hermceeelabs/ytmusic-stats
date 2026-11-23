@@ -148,6 +148,7 @@ export const TopChartsView: React.FC<TopChartsViewProps> = ({
                           <img
                             src={artist.thumbnail}
                             alt={artist.name}
+                            loading="lazy"
                             className="h-9 w-9 rounded-full object-cover bg-zinc-800 shrink-0"
                           />
                         ) : (
@@ -211,6 +212,7 @@ export const TopChartsView: React.FC<TopChartsViewProps> = ({
                           <img
                             src={track.thumbnail}
                             alt={track.title}
+                            loading="lazy"
                             className="h-9 w-9 rounded-lg object-cover bg-zinc-800 shrink-0"
                           />
                         ) : (

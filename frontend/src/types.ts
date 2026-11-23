@@ -10,7 +10,7 @@ export interface DateFilter {
 
 export type Granularity = 'day' | 'week' | 'month';
 
-export type NavTab = 'overview' | 'charts' | 'habits' | 'compare' | 'library';
+export type NavTab = 'overview' | 'charts' | 'habits' | 'compare';
 
 export interface PlayEvent {
   id: string;

@@ -347,6 +347,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                   <img
                     src={artist.thumbnail}
                     alt={artist.name}
+                    loading="lazy"
                     className="h-10 w-10 rounded-full object-cover bg-zinc-800 shrink-0"
                   />
                 ) : (
@@ -400,6 +401,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                   <img
                     src={track.thumbnail}
                     alt={track.title}
+                    loading="lazy"
                     className="h-10 w-10 rounded-lg object-cover bg-zinc-800 shrink-0"
                   />
                 ) : (
